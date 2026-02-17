@@ -860,7 +860,7 @@ export const HotelAddManagement = ({ onViewHotel }) => {
 
       {/* Add Admin Form */}
       <Dialog open={showAddAdmin} onOpenChange={setShowAddAdmin}>
-        <DialogContent>
+        <DialogContent className="h-[96vh] lg:h-[90vh] w-[90vw] rounded-md overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <DialogHeader>
             <DialogTitle>Add Admin</DialogTitle>
           </DialogHeader>
@@ -998,7 +998,7 @@ export const HotelAddManagement = ({ onViewHotel }) => {
 
       {/* Add Room Dialog */}
       <Dialog open={showAddHotel} onOpenChange={setShowAddHotel}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] rounded-md overflow-auto w-[90vw] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <DialogHeader>
             <DialogTitle>Add New Hotel</DialogTitle>
           </DialogHeader>
@@ -1203,7 +1203,7 @@ export const HotelAddManagement = ({ onViewHotel }) => {
 
       {/* Edit Room Dialog */}
       <Dialog open={showEditHotel} onOpenChange={setShowEditHotel}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <DialogHeader>
             <DialogTitle>Update Hotel</DialogTitle>
           </DialogHeader>
