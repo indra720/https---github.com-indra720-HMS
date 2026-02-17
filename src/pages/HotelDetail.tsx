@@ -188,6 +188,7 @@ const HotelDetail = () => {
 
       <div className="container mx-auto px-4 py-8">
         {/* Hotel Images Gallery */}
+        {/* hotel galery image*/}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
           <div className="lg:col-span-2">
             <div className="aspect-video bg-muted rounded-lg overflow-hidden relative group">
