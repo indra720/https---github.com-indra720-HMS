@@ -96,7 +96,7 @@ export const TrendingDestinations = () => {
   }
 
   const accessToken = localStorage.getItem("accessToken") || "";
-  const [trendingDestinations, setTrendingDestinations] = useState<Destination[]>([]);
+  const [trendingDestinations, setTrendingDestinations] = useState<any[]>([]);
 
   const getTrending = async () => {
     try {
@@ -107,25 +107,27 @@ export const TrendingDestinations = () => {
           // Authorization: `Bearer ${accessToken}`,
         },
       });
-      const data = await response.json();
-      setTrendingDestinations(data);
       if (response.ok) {
+        const data = await response.json();
+        setTrendingDestinations(data);
         console.log('Trending Destinations', data)
       }
       else {
-        throw new Error(`Failed to get Trending Destinations: ${JSON.stringify(data)}`);
+        // Fallback is handled by using 'destinations' if 'trendingDestinations' is empty
+        console.warn(`Failed to get Trending Destinations, using fallback data`);
       }
     } catch (error) {
       console.error("Error getting Trending Destinations:", error);
     }
-
-
   }
   useEffect(() => {
     getTrending();
   }, [])
+
+  const displayDestinations = trendingDestinations.length > 0 ? trendingDestinations : destinations;
+
   return (
-    <section className="py-10 md:py-20 bg-gradient-to-br from-background to-muted/20">
+    <section className="py-10 bg-gradient-to-br from-background to-muted/20">
       <div className="container mx-auto px-4">
         <div className="text-center mb-8 md:mb-16">
           <Badge className="mb-2 md:mb-4 bg-primary/10 text-primary border-primary/20">
@@ -171,9 +173,9 @@ export const TrendingDestinations = () => {
     `}
           </style>
 
-          {trendingDestinations.slice(0,9).map((destination) => (
+          {displayDestinations.slice(0, 9).map((destination) => (
             <Card
-              key={destination.slug}
+              key={destination.slug || destination.id}
               className="card-anim group relative overflow-hidden rounded-lg border border-gray-200/70 bg-white shadow-lg transition-all duration-400 hover:shadow-xl hover:border-gray-300"
               style={{
                 opacity: 0,
@@ -235,11 +237,11 @@ export const TrendingDestinations = () => {
                     {/* Stats – Hotels & Restaurants */}
                     <div className="mt-6 flex items-center gap-6 text-sm">
                       <div>
-                        <span className="font-bold text-lg">{destination.state_hotel_count}</span>
+                        <span className="font-bold text-lg">{destination.state_hotel_count || destination.hotels}</span>
                         <span className="block text-white/80 text-xs">Hotels</span>
                       </div>
                       <div>
-                        <span className="font-bold text-lg">{destination.state_restaurant_count}</span>
+                        <span className="font-bold text-lg">{destination.state_restaurant_count || destination.restaurants}</span>
                         <span className="block text-white/80 text-xs">Restaurants</span>
                       </div>
                     </div>
