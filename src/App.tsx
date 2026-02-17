@@ -27,6 +27,8 @@ import RestaurantList from "./components/restaurant/RestaurantList";
 import AuthRedirect from "./pages/AuthRedirect";
 
 
+// testing gi
+
 const queryClient = new QueryClient();
 
 const App = () => {
