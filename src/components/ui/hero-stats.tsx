@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 const destinations = [
   { name: "Delhi", img: "/delhi.jpg", accommodations: "2,004 accommodations" },
@@ -56,7 +56,8 @@ export const HeroStats = () => {
   }
 
   const accessToken = localStorage.getItem("accessToken") || "";
-  const [trendingDestinations, setTrendingDestinations] = useState<Destination[]>([]);
+  const [trendingDestinations, setTrendingDestinations] = useState<any[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const getTrending = async () => {
     try {
@@ -67,13 +68,13 @@ export const HeroStats = () => {
           // Authorization: `Bearer ${accessToken}`,
         },
       });
-      const data = await response.json();
-      setTrendingDestinations(data);
       if (response.ok) {
+        const data = await response.json();
+        setTrendingDestinations(data);
         console.log('Trending Destinations', data)
       }
       else {
-        throw new Error(`Failed to get Trending Destinations: ${JSON.stringify(data)}`);
+        throw new Error(`Failed to get Trending Destinations: ${JSON.stringify(await response.text())}`);
       }
     } catch (error) {
       console.error("Error getting Trending Destinations:", error);
@@ -84,16 +85,48 @@ export const HeroStats = () => {
   useEffect(() => {
     getTrending();
   }, [])
+
+  const displayDestinations = trendingDestinations.length > 0 ? trendingDestinations : destinations.map(d => ({
+    name: d.name,
+    image: d.img,
+    hotel_count: d.accommodations.split(' ')[0]
+  }));
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const target = entry.target as HTMLElement;
+            target.style.opacity = '1';
+            target.style.transform = 'translateY(0)';
+            target.style.filter = 'blur(0px)';
+            observer.unobserve(target);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    const cards = container.querySelectorAll('.hero-stat-card');
+    cards.forEach((card) => observer.observe(card));
+
+    return () => observer.disconnect();
+  }, [displayDestinations]);
+
   return (
-    <section className="w-full py-8 md:py-16  ">
+    <section className="w-full py-6  ">
       <div className="max-w-7xl mx-auto px-4">
         {/* Title */}
-        <h3 className="text-3xl md:text-4xl font-bold text-center mb-2 text-gray-900">
+        <h3 className="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-900">
           Top Hotel & Restro in India
         </h3>
 
         {/* Divider */}
-        <div className="flex justify-center mb-10">
+        {/* <div className="flex justify-center mb-10">
           <div className="w-32 border-t-2 border-gray-400 relative flex items-center justify-center">
             <span className="absolute left-0 -top-2 w-3 h-3 bg-black rounded-full"></span>
             <span className="absolute right-0 -top-2 w-3 h-3 bg-black rounded-full"></span>
@@ -101,11 +134,11 @@ export const HeroStats = () => {
               ✧
             </span>
           </div>
-        </div>
+        </div> */}
 
         {/* Grid Layout */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-10 gap-4">
-          {trendingDestinations.slice(0, 10).map((dest, index) => {
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-10 gap-4" ref={containerRef}>
+          {displayDestinations.slice(0, 10).map((dest, index) => {
             const columns = 10;
             const row = Math.floor(index / columns);
             const col = index % columns;
@@ -116,7 +149,7 @@ export const HeroStats = () => {
             return (
               <div
                 key={dest.name}
-                className="flex flex-col items-center cursor-pointer group"
+                className="hero-stat-card flex flex-col items-center cursor-pointer group"
                 style={{
                   transition: 'all 1000ms cubic-bezier(0.22, 0.88, 0.32, 1)',
                   transitionDelay: `${delay}ms`,
@@ -124,24 +157,6 @@ export const HeroStats = () => {
                   transform: 'translateY(40px)',
                   filter: 'blur(4px)',
                 } as React.CSSProperties}
-                ref={(el) => {
-                  if (!el) return;
-                  const observer = new IntersectionObserver(
-                    ([entry]) => {
-                      if (entry.isIntersecting) {
-                        el.style.opacity = '1';
-                        el.style.transform = 'translateY(0)';
-                        el.style.filter = 'blur(0px)';
-                        observer.unobserve(el);
-                      }
-                    },
-                    {
-                      threshold: 0.1,
-                      rootMargin: "0px 0px -100px 0px", // triggers earlier, 200px above viewport bottom
-                    }
-                  );
-                  observer.observe(el);
-                }}
               >
                 {/* TERA ORIGINAL PREMIUM HOVER EFFECT */}
                 <div className="w-28 h-28 rounded-full overflow-hidden shadow-lg mb-3 border-4 border-white 

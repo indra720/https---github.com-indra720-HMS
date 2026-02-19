@@ -323,13 +323,13 @@ const Home = () => {
           "Content-Type": "application/json",
         },
       });
-      const data = await response.json();
-      setFeaturedList(data);
       if (response.ok) {
+        const data = await response.json();
+        setFeaturedList(data);
         console.log('Featured Destinations', data)
       }
       else {
-        throw new Error(`Failed to get Featured Destinations: ${JSON.stringify(data)}`);
+        throw new Error(`Failed to get Featured Destinations: ${JSON.stringify(await response.json())}`);
       }
     } catch (error) {
       console.error("Error getting Featured Destinations:", error);
@@ -345,13 +345,13 @@ const Home = () => {
           // Authorization: `Bearer ${accessToken}`,
         },
       });
-      const data = await response.json();
-      setComments(data);
       if (response.ok) {
+        const data = await response.json();
+        setComments(data);
         console.log('Comments', data)
       }
       else {
-        throw new Error(`Failed to get Comments: ${JSON.stringify(data)}`);
+        throw new Error(`Failed to get Comments: ${JSON.stringify(await response.json())}`);
       }
     } catch (error) {
       console.error("Error getting Comments:", error);
@@ -399,6 +399,45 @@ const Home = () => {
 
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Create a fallback list by combining and mapping the static hotel/restaurant data
+  
+  const fallbackFeatured = [
+    ...hotels.map(h => ({
+      id: `hotel-${h.id}`,
+      type: 'hotel',
+      name: h.name,
+      address: h.location,
+      category: h.category,
+      description: h.description,
+      amenities: h.amenities.join(', '),
+      cover_photo: h.image,
+      review: {
+        rating: h.rating,
+        count: h.reviews,
+      }
+    })),
+    ...restaurants.map(r => ({
+      id: `restaurant-${r.id}`,
+      type: 'restaurant',
+      name: r.name,
+      address: r.location,
+      category: r.category,
+      description: r.description,
+      amenities: r.specialties.join(', '),
+      cover_photo: r.image,
+      review: {
+        rating: r.rating,
+        count: r.reviews,
+      }
+    }))
+  ].sort(() => 0.5 - Math.random()); // Shuffle for variety
+
+  // Use API data if available, otherwise use the fallback
+  const displayFeatured = featuredList.length > 0 ? featuredList : fallbackFeatured;
+
+  // Use API comments if available, otherwise use the static testimonials as a fallback
+  const displayComments = comments.length > 0 ? comments : testimonials.map(t => ({ comment: t.text, rating: t.rating, user_name: t.name, user_image: t.image }));
+1
   return (
     <div className="min-h-screen bg-background relative">
       {/* Header */}
@@ -494,10 +533,10 @@ const Home = () => {
       <Browse_exp />
 
       {/* Features Grid */}
-      <FeaturesGrid />
+      {/* <FeaturesGrid /> */}
 
       {/* Featured Section */}
-      {featuredList.length > 0 && (
+      {displayFeatured.length > 0 && (
         <section className="py-20 bg-gradient-to-br from-primary/5 to-secondary/5">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
@@ -515,7 +554,7 @@ const Home = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {featuredList.slice(0, 6).map((item) => (
+              {displayFeatured.slice(0, 6).map((item) => (
                 <FeatureCard key={`${item.type}-${item.id}`} item={item} />
               ))}
             </div>
@@ -534,7 +573,7 @@ const Home = () => {
                 {activeTab === "restaurants" && "Exceptional Restaurants"}
               </h2>
               <p className="text-muted-foreground text-lg">
-                {featuredList.length} places found
+                {displayFeatured.length} places found
               </p>
             </div>
 
@@ -557,8 +596,8 @@ const Home = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featuredList.map((item) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {displayFeatured.slice(0, 8).map((item) => (
             <FeatureCard key={`${item.type}-${item.id}`} item={item} />
           ))}
         </div>
@@ -587,10 +626,10 @@ const Home = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className=" py-8 md:py-20 bg-gradient-to-br from-muted/20 to-background">
+      <section className=" py-8 md:py-12 bg-gradient-to-br from-muted/20 to-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8 md:mb-16">
-            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
+            <Badge className="mb-8 bg-primary/10 text-primary border-primary/20">
               <Users className="h-4 w-4 mr-2" />
               Customer Stories
             </Badge>
@@ -604,7 +643,7 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {comments.map((testimonial, index) => (
+            {displayComments.map((testimonial, index) => (
               <Card
                 key={index}
                 className="border-2 hover:border-primary/20 transition-colors"
@@ -667,16 +706,16 @@ const Home = () => {
                 Your trusted partner for finding the best hotels and restaurants worldwide. Creating unforgettable experiences since 2024.
               </p>
 
-              {/* <div className="space-y-4">
+              <div className="space-y-4">
                 <a href="tel:+15551234567" className="flex items-center gap-3 text-sm hover:text-cyan-400 transition-colors group">
                   <Phone className="h-4 w-4 text-cyan-400 group-hover:scale-110 transition-transform" />
-                  <span className="text-slate-200 font-medium">+91 8094603700</span>
+                  <span className="text-slate-200 font-medium">+91 9166315765</span>
                 </a>
                 <a href="mailto:support@hospitalityhub.com" className="flex items-center gap-3 text-sm hover:text-cyan-400 transition-colors group">
                   <Mail className="h-4 w-4 text-cyan-400 group-hover:scale-110 transition-transform" />
-                  <span className="text-slate-200 font-medium">pramodsaini189@gmail.com</span>
+                  <span className="text-slate-200 font-medium">pradeepkumawat@gmail.com</span>
                 </a>
-              </div> */}
+              </div>
             </div>
 
             {/* For Travelers */}
